@@ -25,6 +25,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
       lang={lang}
       dir={isRTL(lang) ? "rtl" : "ltr"}
       className={`${poppins.className} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
         <Providers lang={lang}>{children}</Providers>
