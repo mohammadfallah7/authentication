@@ -2,6 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { LoginPayload, RegisterPayload } from "@/types";
+import { headers } from "next/headers";
 
 export async function register(payload: RegisterPayload) {
   try {
@@ -22,8 +23,19 @@ export async function login(payload: LoginPayload) {
 
     return { success: true, status: 200, response: res };
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to register";
+    const message = error instanceof Error ? error.message : "Failed to login";
+
+    return { success: false, status: 500, error: message };
+  }
+}
+
+export async function logout() {
+  try {
+    const res = await auth.api.signOut({ headers: await headers() });
+
+    return { success: true, status: 200, response: res };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to logout";
 
     return { success: false, status: 500, error: message };
   }
