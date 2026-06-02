@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { login } from "@/actions";
+import { loginSchema } from "@/types";
 import {
   Button,
   Card,
@@ -9,16 +10,58 @@ import {
   Input,
   Label,
   TextField,
+  toast,
 } from "@heroui/react";
 import { linkVariants } from "@heroui/styles";
+import { useMutation } from "@tanstack/react-query";
+import { LucideLoader } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function LoginForm() {
+  const router = useRouter();
+  const { mutate, isPending } = useMutation({
+    mutationFn: login,
+    onMutate: () => {
+      const loadingId = toast("Login to account...", {
+        description: "Please wait while logging you in",
+        isLoading: true,
+        timeout: 0,
+      });
+
+      return { loadingId };
+    },
+    onSuccess: (data, _, onMutateResult) => {
+      toast.close(onMutateResult.loadingId);
+
+      if (data.success) {
+        toast.success("Login successful", {
+          description: `Welcome back dear, ${data.response?.user.name}`,
+        });
+        router.replace("/dashboard");
+      } else {
+        toast.danger("Login failed", {
+          description: data.error,
+        });
+      }
+    },
+    onError: (error) => {
+      toast.danger("Oops", {
+        description: error.message,
+      });
+    },
+  });
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    const rawFormData = Object.fromEntries(formData);
-    console.log(rawFormData);
+    const fields = loginSchema.safeParse(Object.fromEntries(formData));
+    if (!fields.success) {
+      return toast.danger("Missing fields");
+    }
+
+    mutate(fields.data);
   }
 
   const slots = linkVariants();
@@ -53,7 +96,8 @@ export function LoginForm() {
             </div>
           </Card.Content>
           <Card.Footer className="mt-4 flex flex-col gap-3">
-            <Button className="w-full" type="submit">
+            <Button isDisabled={isPending} className="w-full" type="submit">
+              {isPending && <LucideLoader className="size-4 animate-spin" />}
               Sign In
             </Button>
             <div className="flex items-center justify-center gap-1 flex-col md:flex-row">

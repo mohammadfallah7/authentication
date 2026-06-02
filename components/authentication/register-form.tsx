@@ -33,11 +33,17 @@ export function RegisterForm() {
     },
     onSuccess: (data, _, onMutateResult) => {
       toast.close(onMutateResult.loadingId);
-      toast.success("Register successful", {
-        description: `Welcome dear, ${data.response?.user.name}`,
-      });
 
-      router.replace("/dashboard");
+      if (data.success) {
+        toast.success("Register successful", {
+          description: `Welcome dear, ${data.response?.user.name}`,
+        });
+        router.replace("/dashboard");
+      } else {
+        toast.danger("Register failed", {
+          description: data.error,
+        });
+      }
     },
     onError: (error) => {
       toast.danger("Oops", {
@@ -46,7 +52,7 @@ export function RegisterForm() {
     },
   });
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 

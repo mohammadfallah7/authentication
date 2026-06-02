@@ -5,5 +5,7 @@ export const registerSchema = z.object({
   email: z.email({ error: "Email is invalid" }).trim(),
   password: z.string({ error: "Password filed is required" }).trim(),
 });
-
 export type RegisterPayload = z.infer<typeof registerSchema>;
+
+export const loginSchema = registerSchema.omit({ name: true });
+export type LoginPayload = z.infer<typeof loginSchema>;
