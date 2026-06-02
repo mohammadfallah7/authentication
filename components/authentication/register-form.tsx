@@ -1,5 +1,7 @@
 "use client";
 
+import { register } from "@/actions";
+import { registerSchema } from "@/types";
 import {
   Button,
   Card,
@@ -8,17 +10,52 @@ import {
   Input,
   Label,
   TextField,
+  toast,
 } from "@heroui/react";
 import { linkVariants } from "@heroui/styles";
+import { useMutation } from "@tanstack/react-query";
+import { LucideLoader } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function RegisterForm() {
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  const router = useRouter();
+  const { mutate, isPending } = useMutation({
+    mutationFn: register,
+    onMutate: () => {
+      const loadingId = toast("Creating account...", {
+        description: "Please wait while we create your account",
+        isLoading: true,
+        timeout: 0,
+      });
+
+      return { loadingId };
+    },
+    onSuccess: (data, _, onMutateResult) => {
+      toast.close(onMutateResult.loadingId);
+      toast.success("Register successful", {
+        description: `Welcome dear, ${data.response?.user.name}`,
+      });
+
+      router.replace("/dashboard");
+    },
+    onError: (error) => {
+      toast.danger("Oops", {
+        description: error.message,
+      });
+    },
+  });
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    const rawFormData = Object.fromEntries(formData);
-    console.log(rawFormData);
+    const fields = registerSchema.safeParse(Object.fromEntries(formData));
+    if (!fields.success) {
+      return toast.danger("Missing fields");
+    }
+
+    mutate(fields.data);
   }
 
   const slots = linkVariants();
@@ -55,7 +92,8 @@ export function RegisterForm() {
             </div>
           </Card.Content>
           <Card.Footer className="mt-4 flex flex-col gap-3">
-            <Button className="w-full" type="submit">
+            <Button isDisabled={isPending} className="w-full" type="submit">
+              {isPending && <LucideLoader className="size-4 animate-spin" />}
               Sign Up
             </Button>
             <div className="flex items-center justify-center gap-1 flex-col md:flex-row">
