@@ -35,10 +35,8 @@ export function RegisterForm() {
       toast.close(onMutateResult.loadingId);
 
       if (data.success) {
-        toast.success("Register successful", {
-          description: `Welcome dear, ${data.response?.user.name}`,
-        });
-        router.replace("/dashboard");
+        toast.success("Register successful");
+        router.replace("/login");
       } else {
         toast.danger("Register failed", {
           description: data.error,
