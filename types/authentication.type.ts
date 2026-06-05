@@ -12,3 +12,17 @@ export type LoginPayload = z.infer<typeof loginSchema>;
 
 export const forgotPasswordSchema = registerSchema.pick({ email: true });
 export type ForgotPasswordPayload = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z.string({ error: "Password filed is required" }).trim(),
+    repeatPassword: z
+      .string({ error: "Repeat password filed is required" })
+      .trim(),
+    token: z.string().nullish(),
+  })
+  .refine((data) => data.newPassword === data.repeatPassword, {
+    error: "Passwords do not match",
+    path: ["newPassword"],
+  });
+export type ResetPasswordPayload = z.infer<typeof resetPasswordSchema>;
