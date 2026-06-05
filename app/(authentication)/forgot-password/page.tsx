@@ -1,5 +1,7 @@
+import { ForgotPasswordForm } from "@/components";
+
 const ForgotPassword = () => {
-  return <div>ForgotPassword</div>;
+  return <ForgotPasswordForm />;
 };
 
 export default ForgotPassword;

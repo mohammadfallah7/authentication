@@ -1,4 +1,4 @@
-import { VerifyEmailTemplate } from "@/components";
+import { ResetPasswordTemplate, VerifyEmailTemplate } from "@/components";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
@@ -11,6 +11,17 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    sendResetPassword: async ({ user, url }) => {
+      await resend.emails.send({
+        from: `${process.env.RESEND_SENDER_NAME} <${process.env.RESEND_SENDER_EMAIL}>`,
+        to: user.email,
+        subject: "Reset Your Password",
+        react: ResetPasswordTemplate({
+          name: user.name,
+          resetUrl: url,
+        }),
+      });
+    },
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
@@ -26,6 +37,7 @@ export const auth = betterAuth({
       });
     },
     autoSignInAfterVerification: true,
+    sendOnSignIn: true,
   },
   plugins: [nextCookies()],
 });

@@ -9,3 +9,6 @@ export type RegisterPayload = z.infer<typeof registerSchema>;
 
 export const loginSchema = registerSchema.omit({ name: true });
 export type LoginPayload = z.infer<typeof loginSchema>;
+
+export const forgotPasswordSchema = registerSchema.pick({ email: true });
+export type ForgotPasswordPayload = z.infer<typeof forgotPasswordSchema>;
