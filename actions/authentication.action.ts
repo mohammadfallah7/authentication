@@ -7,6 +7,7 @@ import {
   RegisterPayload,
   ResetPasswordPayload,
   Toggle2FAPayload,
+  VerifyOTPPayload,
 } from "@/types";
 import { headers } from "next/headers";
 
@@ -28,15 +29,48 @@ export async function register(payload: RegisterPayload) {
 
 export async function login(payload: LoginPayload) {
   try {
-    const res = await auth.api.signInEmail({
+    const { headers: responseHeaders, response } = await auth.api.signInEmail({
+      returnHeaders: true,
       body: { ...payload },
       headers: await headers(),
     });
 
-    return { success: true, status: 200, response: res };
+    if ("twoFactorRedirect" in response) {
+      const cookieHeader = responseHeaders.getSetCookie().join("; ");
+
+      await auth.api.sendTwoFactorOTP({ headers: { cookie: cookieHeader } });
+
+      return {
+        success: true,
+        status: 200,
+        twoFactorRedirect: true,
+        cookieHeader,
+      };
+    }
+
+    return { success: true, status: 200, response };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to login";
 
+    return { success: false, status: 500, error: message };
+  }
+}
+
+export async function verifyOTP(payload: VerifyOTPPayload) {
+  try {
+    if (!payload.cookieHeader) {
+      return { success: false, status: 400, error: "The cookie is required" };
+    }
+
+    const res = await auth.api.verifyTwoFactorOTP({
+      body: { code: payload.code },
+      headers: { cookie: payload.cookieHeader },
+    });
+
+    return { success: true, status: 200, response: res };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Verification failed";
     return { success: false, status: 500, error: message };
   }
 }

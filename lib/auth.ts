@@ -1,4 +1,8 @@
-import { ResetPasswordTemplate, VerifyEmailTemplate } from "@/components";
+import {
+  ResetPasswordTemplate,
+  SendOTPTemplate,
+  VerifyEmailTemplate,
+} from "@/components";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
@@ -42,5 +46,20 @@ export const auth = betterAuth({
     sendOnSignIn: true,
   },
   appName: "Authentication",
-  plugins: [nextCookies(), twoFactor({ skipVerificationOnEnable: true })],
+  plugins: [
+    twoFactor({
+      skipVerificationOnEnable: true,
+      otpOptions: {
+        sendOTP: async ({ user, otp }) => {
+          await resend.emails.send({
+            from: `${process.env.RESEND_SENDER_NAME} <${process.env.RESEND_SENDER_EMAIL}>`,
+            to: user.email,
+            subject: "Verify Your Account",
+            react: SendOTPTemplate({ otpCode: otp, userEmail: user.email }),
+          });
+        },
+      },
+    }),
+    nextCookies(),
+  ],
 });

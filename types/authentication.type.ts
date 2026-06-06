@@ -29,3 +29,12 @@ export type ResetPasswordPayload = z.infer<typeof resetPasswordSchema>;
 
 export const toggle2FASchema = registerSchema.pick({ password: true });
 export type Toggle2FAPayload = z.infer<typeof toggle2FASchema>;
+
+export const verifyOTPSchema = z.object({
+  code: z
+    .string({ error: "The OTP code is required" })
+    .min(6, { error: "The OPT code is 6 digits" })
+    .max(6, { error: "The OPT code is 6 digits" }),
+  cookieHeader: z.string().nullish(),
+});
+export type VerifyOTPPayload = z.infer<typeof verifyOTPSchema>;
