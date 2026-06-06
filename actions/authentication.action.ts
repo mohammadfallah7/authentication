@@ -6,6 +6,7 @@ import {
   LoginPayload,
   RegisterPayload,
   ResetPasswordPayload,
+  Toggle2FAPayload,
 } from "@/types";
 import { headers } from "next/headers";
 
@@ -80,6 +81,39 @@ export async function resetPassword(payload: ResetPasswordPayload) {
     });
 
     return { success: true, status: 200, response: res };
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to send reset password link";
+
+    return { success: false, status: 500, error: message };
+  }
+}
+
+export async function toggle2FA(payload: Toggle2FAPayload) {
+  try {
+    const session = await auth.api.getSession({ headers: await headers() });
+
+    if (!session) {
+      return { success: false, status: 401, error: "Unauthorized" };
+    }
+
+    if (session.user.twoFactorEnabled) {
+      const res = await auth.api.disableTwoFactor({
+        body: { password: payload.password },
+        headers: await headers(),
+      });
+
+      return { success: true, status: 200, response: res };
+    } else {
+      const res = await auth.api.enableTwoFactor({
+        body: { password: payload.password },
+        headers: await headers(),
+      });
+
+      return { success: true, status: 200, response: res };
+    }
   } catch (error) {
     const message =
       error instanceof Error

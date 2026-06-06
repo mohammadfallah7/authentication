@@ -26,3 +26,6 @@ export const resetPasswordSchema = z
     path: ["newPassword"],
   });
 export type ResetPasswordPayload = z.infer<typeof resetPasswordSchema>;
+
+export const toggle2FASchema = registerSchema.pick({ password: true });
+export type Toggle2FAPayload = z.infer<typeof toggle2FASchema>;

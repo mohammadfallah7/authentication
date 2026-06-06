@@ -2,6 +2,7 @@ import { ResetPasswordTemplate, VerifyEmailTemplate } from "@/components";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
+import { twoFactor } from "better-auth/plugins";
 import prisma from "./prisma";
 import resend from "./resend";
 
@@ -40,5 +41,6 @@ export const auth = betterAuth({
     autoSignInAfterVerification: true,
     sendOnSignIn: true,
   },
-  plugins: [nextCookies()],
+  appName: "Authentication",
+  plugins: [nextCookies(), twoFactor({ skipVerificationOnEnable: true })],
 });
