@@ -26,7 +26,7 @@ const DashboardPage = async () => {
         </div>
       </header>
 
-      <section className="bg-overlay rounded-lg p-5 flex items-center justify-between gap-4 mt-16">
+      <section className="bg-overlay overflow-hidden rounded-lg p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mt-16">
         <div className="flex items-center gap-4">
           <div className="bg-accent size-16 flex items-center justify-center rounded-full">
             <span className="text-2xl font-semibold text-accent-foreground">
