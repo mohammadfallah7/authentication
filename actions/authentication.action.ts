@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 import {
   ForgotPasswordPayload,
   LoginPayload,
@@ -22,6 +23,27 @@ export async function register(payload: RegisterPayload) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to register";
+
+    return { success: false, status: 500, error: message };
+  }
+}
+
+export async function verifyEmail(payload: { token: string }) {
+  try {
+    await auth.api.verifyEmail({
+      query: { token: payload.token },
+    });
+
+    return {
+      success: true,
+      status: 200,
+      response: "Your email address successfully verified",
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to verify your email address";
 
     return { success: false, status: 500, error: message };
   }
@@ -70,16 +92,23 @@ export async function verifyOTP(payload: VerifyOTPPayload) {
     return { success: true, status: 200, response: res };
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Verification failed";
+      error instanceof Error
+        ? error.message
+        : "Failed to verify Two-Factor authentication";
     return { success: false, status: 500, error: message };
   }
 }
 
 export async function logout() {
   try {
-    const res = await auth.api.signOut({ headers: await headers() });
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) {
+      return { success: false, status: 401, error: "Unauthorized" };
+    }
 
-    return { success: true, status: 200, response: res };
+    await auth.api.signOut({ headers: await headers() });
+
+    return { success: true, status: 200, response: "Successfully logout" };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to logout";
 
@@ -89,11 +118,27 @@ export async function logout() {
 
 export async function forgotPassword(payload: ForgotPasswordPayload) {
   try {
-    const res = await auth.api.requestPasswordReset({
+    const user = await prisma.user.findUnique({
+      where: { email: payload.email },
+      select: { id: true },
+    });
+    if (!user) {
+      return {
+        success: false,
+        status: 404,
+        error: "User with this email address not found",
+      };
+    }
+
+    await auth.api.requestPasswordReset({
       body: { ...payload, redirectTo: "/reset-password" },
     });
 
-    return { success: true, status: 200, response: res };
+    return {
+      success: true,
+      status: 200,
+      response: "Check your email for the reset link",
+    };
   } catch (error) {
     const message =
       error instanceof Error
@@ -110,16 +155,18 @@ export async function resetPassword(payload: ResetPasswordPayload) {
       return { success: false, status: 400, error: "Token is required" };
     }
 
-    const res = await auth.api.resetPassword({
+    await auth.api.resetPassword({
       body: { newPassword: payload.newPassword, token: payload.token },
     });
 
-    return { success: true, status: 200, response: res };
+    return {
+      success: true,
+      status: 200,
+      response: "Your password successfully reset",
+    };
   } catch (error) {
     const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to send reset password link";
+      error instanceof Error ? error.message : "Failed reset your password";
 
     return { success: false, status: 500, error: message };
   }
@@ -134,25 +181,33 @@ export async function toggle2FA(payload: Toggle2FAPayload) {
     }
 
     if (session.user.twoFactorEnabled) {
-      const res = await auth.api.disableTwoFactor({
+      await auth.api.disableTwoFactor({
         body: { password: payload.password },
         headers: await headers(),
       });
 
-      return { success: true, status: 200, response: res };
+      return {
+        success: true,
+        status: 200,
+        response: "Two-Factor authentication successfully disabled",
+      };
     } else {
-      const res = await auth.api.enableTwoFactor({
+      await auth.api.enableTwoFactor({
         body: { password: payload.password },
         headers: await headers(),
       });
 
-      return { success: true, status: 200, response: res };
+      return {
+        success: true,
+        status: 200,
+        response: "Two-Factor authentication successfully enabled",
+      };
     }
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
-        : "Failed to send reset password link";
+        : "Failed to toggle Two-Factor authentication";
 
     return { success: false, status: 500, error: message };
   }
