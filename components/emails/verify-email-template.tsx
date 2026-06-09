@@ -85,7 +85,8 @@ export const VerifyEmailTemplate = (props: VerifyEmailTemplate) => {
                 This email was sent to {props.email}
               </Text>
               <Text className="text-[12px] text-gray-500 leading-[16px] m-0">
-                © 2024 Authentication. All rights reserved.
+                © {new Date().getFullYear()} Authentication. All rights
+                reserved.
               </Text>
             </Section>
           </Container>

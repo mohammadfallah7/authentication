@@ -89,7 +89,8 @@ export const SendOTPTemplate = (props: SendOTPTemplateProps) => {
                 This email was sent to {userEmail}
               </Text>
               <Text className="text-[12px] text-gray-400 leading-[16px] m-0 mb-[16px]">
-                © 2026 Authentication. All rights reserved.
+                © {new Date().getFullYear()} Authentication. All rights
+                reserved.
               </Text>
             </Section>
           </Container>

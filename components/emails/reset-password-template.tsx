@@ -102,19 +102,8 @@ export const ResetPasswordTemplate = (props: ResetPasswordTemplateProps) => {
             {/* Footer */}
             <Section className="border-t border-gray-200 pt-[24px]">
               <Text className="text-[12px] text-gray-500 leading-[16px] m-0 text-center">
-                © 2026 Your Company Name. All rights reserved.
-              </Text>
-              <Text className="text-[12px] text-gray-500 leading-[16px] m-0 text-center">
-                123 Business Street, Suite 100, City, State 12345
-              </Text>
-              <Text className="text-[12px] text-gray-500 leading-[16px] m-0 text-center">
-                <Link href="#" className="text-gray-500 underline">
-                  Unsubscribe
-                </Link>
-                {" | "}
-                <Link href="#" className="text-gray-500 underline">
-                  Privacy Policy
-                </Link>
+                © {new Date().getFullYear()} Your Company Name. All rights
+                reserved.
               </Text>
             </Section>
           </Container>
