@@ -37,7 +37,7 @@ export const ForgotPasswordForm = () => {
 
       if (data.success) {
         toast.success("Email successfully sent", {
-          description: data.response?.message,
+          description: data.response,
         });
         setEmailSent(true);
       } else {
